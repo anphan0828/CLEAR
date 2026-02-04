@@ -85,12 +85,12 @@ stat <- gene_file$V4
 
 print(head(gene_file))
 
-# use stat as input for GSEA (for LRT results)
+# use stat as input for GSEA
 input = gene_file$V4
 names(input) <- gene_file$V1
 
 result <- clusterProfiler::GSEA(geneList = input, minGSSize = 1, maxGSSize = 100000, pvalueCutoff = 1, pAdjustMethod = "none", 
-  gson = NULL, TERM2GENE = annt2, eps = 0, by = "fgsea") # smaller terms
+  gson = NULL, TERM2GENE = annt2, eps = 0, by = "fgsea")
 df_gsea2 <- as.data.frame(result) %>%
   arrange(ID) 
 print(colnames(df_gsea2))

@@ -1,0 +1,4 @@
+{"ID_metric": 1,"metric":"scripts_real_data_analysis/3_run_phenorelevance_clear.py","metric_params":{"use_gene_file": 1, "p": "GO_BP.cp"}}
+{"ID_metric": 2,"metric":"scripts_real_data_analysis/3_run_overlap_ties_clear.py", "metric_params":{"n": 20}}
+{"ID_metric": 3,"metric":"scripts_real_data_analysis/3_run_termsize_ties_clear.py", "metric_params":{"n": 20}}
+{"ID_metric": 4,"metric":"scripts_real_data_analysis/3_run_combine_repeats.py","metric_params":{}}

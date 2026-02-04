@@ -96,7 +96,7 @@ p_values <- gene_file$V3
 stat <- gene_file$V4
 
 # model p-values
-# trunctaed normal
+# gamma distribution
 result_gamma<- CLEAR(genes, p_values, GO,
                         n_iterations = as.integer(args$n_iterations), burn_in = as.integer(args$burn_in),
                         stat_type = "p-value", model_dist = "gamma")

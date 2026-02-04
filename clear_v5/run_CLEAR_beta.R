@@ -96,7 +96,7 @@ source("clear_v5/CLEARv5.R")
 set.seed(selected_seed)
 
 # model p-values
-# trunctaed normal
+# beta distribution
 result_beta <- CLEAR(genes, p_values, GO,
                     n_iterations = as.integer(args$n_iterations), burn_in = as.integer(args$burn_in),
                     stat_type = "p-value",
