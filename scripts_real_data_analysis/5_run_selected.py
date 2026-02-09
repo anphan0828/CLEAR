@@ -17,8 +17,11 @@ ARRAY_SIZE = args.ARRAY_SIZE
 # data_folder = args.data_folder
 if args.data_prepare is not None:
     data_prepare = args.data_prepare
-    
-run_list = cp.load(open("4_run_list", "rb"))
+else:
+    data_prepare = None
+
+with open("4_run_list", "rb") as f:    
+    run_list = cp.load(f)
 
 # Actually assign to job array after constructing run list
 print(f"Assigning {len(run_list)} jobs to SLURM_ID {SLURM_ID} with ARRAY_SIZE {ARRAY_SIZE}")

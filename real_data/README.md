@@ -9,10 +9,10 @@
 
 ### 0. Retrieve datasets from packages
 - `0_de_tcga_array.R`: collects 15 TCGA datasets from GSEABenchmarkeR and perform DESeq2
-- `0_process_geo_data.R`: collects 24 microarray datasets from KEGGdzPathwaysGSEO and perform limma 
+- `0_process_geo_data.R`: collects 24 microarray datasets from KEGGdzPathwaysGEO and perform limma 
 
 ### 1. Collect datasets and annotation data
-```bash 1_generate_dataset_log.sh <real_data_folder> <gaf_file> <obo_file>```
+```bash scripts_real_data_analysis/1_generate_dataset_log.sh <real_data_folder> <gaf_file> <obo_file>```
 - `real_data_folder` (example: real_data/tcga_data) contains TSV files with 2 columns gene symbols and gene-level statistics. If the TSV file contains more than 2 columns, you must provide an R script for data preprocessing when running the methods.
 - `gaf_file` (example: ext_data/03Nov24goa_human.gaf) contains GO annotations in GAF format. This file can be downloaded from GO Data Archive
 - `obo_file` (example: ext_data/24go.obo) contains GO structure in OBO format.
@@ -31,7 +31,7 @@
 
 ### 5. Run the methods
 - To run the dataset-method-metric combinations: ```python 5_run_selected.py 0 1 --data_prepare $data_prepare``` (where data_prepare is an R script that is used to preprocess the gene file if more than 2 columns are in the gene file)
-- All result files (containing gene set and p-value or posterior probability) are stored in results/ folder. All metric scores are stored in `main_result.txt` file. This file keeps a record of which dataset/method/metric combination have been fun, and running ```python3 4_prerun.py``` will check for existing results as stored in this file and exclude from run list.
+- All result files (containing gene set and p-value or posterior probability) are stored in results/ folder. All metric scores are stored in `main_result.txt` file. This file keeps a record of which dataset/method/metric combination have been run, and running ```python3 4_prerun.py``` will check for existing results as stored in this file and exclude from run list.
 
 ### 6. Visualize results
 - Data are parsed and plots are created using `6_clear_notebook.ipynb` file.

@@ -148,7 +148,7 @@ def parse_inputs(argv):
 if __name__== "__main__":
     args=parse_inputs(sys.argv[1:])
     cancer_id = args.gene_file.split("/")[-1].split(".")[0].split("_de_limma")[0]
-    datasetid_file = "GseId2Disease.txt" # for mapping GEO dataset IDs to disease codes
+    datasetid_file = "ext_data/GseId2Disease.txt" # for mapping GEO dataset IDs to disease codes
     microarray_mapping = extract_disease_code_from_dataset(datasetid_file)
     phenotype_df = extract_phenotype_rankings(args.phenorelevance, cancer_id, microarray_mapping=microarray_mapping)
     res = calculate_phenotype_relevance(args.input, phenotype_df)

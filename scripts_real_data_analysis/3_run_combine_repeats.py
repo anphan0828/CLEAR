@@ -177,7 +177,8 @@ def compute_precision_recall(y_true, y_scores, higher_is_better=True):
 # python3 4_prerun.py --datasets 1:39 --methods 63-1,64-1,65-1,66-1 --metrics 4
 datasetid_file = "ext_data/GseId2Disease.txt"
 microarray_mapping = extract_disease_code_from_dataset(datasetid_file)
-run_list = cp.load(open("4_run_list", "rb"))
+with open("4_run_list", "rb") as run_list_file:
+    run_list = cp.load(run_list_file)
 ID_pheno_metric = 1 # phenotype relevance metric ID from 3_metrics_log.ndjson
 with open('main_result.txt', 'a') as f:
     for each in run_list:
@@ -243,13 +244,13 @@ for each in run_list:
     (dataset, method, metric) = each
     ID_dataset = str(dataset["ID_dataset"])
     gene_file = str(dataset["gene_list"])
-    annotation_file = '/work/idoerg/ahphan/benchmark_GSEA/saved_data/' + str(dataset["annotations"])
+    annotation_file = 'saved_data/' + str(dataset["annotations"])
     ID_method = str(method["ID_method"]).split("-")[0]  # remove repeat suffix
     if ID_method != '65':
         continue
     idx+=1
     cancer_id = gene_file.split("/")[-1].split(".")[0].split("_de_limma")[0]
-    input_files = [os.path.join('/work/idoerg/ahphan/benchmark_GSEA/results', x) for x in os.listdir('/work/idoerg/ahphan/benchmark_GSEA/results') if x.startswith(f'{ID_dataset}_{ID_method}-') and x.endswith('_result.tsv')]
+    input_files = [os.path.join('results', x) for x in os.listdir('results') if x.startswith(f'{ID_dataset}_{ID_method}-') and x.endswith('_result.tsv')]
     
     # Resolve ties and get chosen terms
     combined_table, higher_is_better = combine_repeats(input_files)

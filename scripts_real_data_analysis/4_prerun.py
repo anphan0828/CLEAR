@@ -123,8 +123,9 @@ def main():
     print(f"Chosen metrics: {chosen_metrics}") 
     
     run_list = run_dataset_method_metric(get_list_data_files(chosen_datasets), get_list_methods(chosen_methods), get_list_metrics(chosen_metrics))
-
-    cp.dump(run_list, open("4_run_list", "wb"))
+    
+    with open("4_run_list", "wb") as f:
+        cp.dump(run_list, f)
     print(f"\nConstructed run list: {len(run_list)} jobs to run")
 
 if __name__ == "__main__":

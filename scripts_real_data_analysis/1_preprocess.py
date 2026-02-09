@@ -1,5 +1,4 @@
 import ast
-import sys
 import pickle as cp
 import argparse
 import os
@@ -135,14 +134,6 @@ class annotation_data:
             if not os.path.exists('saved_data/save_'+dt+'_ancestors'):
                 print("Propagating from GAF file")
                 gaf = GOA.gafiterator(open(self.annotation_file,'r'))
-                # with open(self.annotation_file, 'r') as f:
-                #     for line in f: 
-                #         if line.startswith('!date-generated:'):
-                #             datestr = line.strip().split(': ')[1]
-                #             print(datestr)
-                #             dt = datetime.strptime(datestr, '%Y-%m-%dT%H:%M')
-                #             dt = dt.strftime('%b%y')
-                #             break
                 print("GAF date generated:", dt)
                 
                 annotation_df = pd.DataFrame.from_dict(gaf, orient="columns").loc[:,["DB_Object_Symbol","GO_ID","Aspect"]]

@@ -28,21 +28,20 @@
 {"ID_method": "65-8","method":"clear_v5/run_CLEAR_gamma.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":8}}
 {"ID_method": "65-9","method":"clear_v5/run_CLEAR_gamma.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":9}}
 {"ID_method": "65-10","method":"clear_v5/run_CLEAR_gamma.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":10}}
-{"ID_method": "66-1","method":"clear_v5/run_CLEAR_stat_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":1}}
-{"ID_method": "66-2","method":"clear_v5/run_CLEAR_stat_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":2}}
-{"ID_method": "66-3","method":"clear_v5/run_CLEAR_stat_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":3}}
-{"ID_method": "66-4","method":"clear_v5/run_CLEAR_stat_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":4}}
-{"ID_method": "66-5","method":"clear_v5/run_CLEAR_stat_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":5}}
-{"ID_method": "66-6","method":"clear_v5/run_CLEAR_stat_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":6}}
-{"ID_method": "66-7","method":"clear_v5/run_CLEAR_stat_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":7}}
-{"ID_method": "66-8","method":"clear_v5/run_CLEAR_stat_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":8}}
-{"ID_method": "66-9","method":"clear_v5/run_CLEAR_stat_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":9}}
-{"ID_method": "66-10","method":"clear_v5/run_CLEAR_stat_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":10}}
+{"ID_method": "66-1","method":"clear_v5/run_CLEAR_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":1}}
+{"ID_method": "66-2","method":"clear_v5/run_CLEAR_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":2}}
+{"ID_method": "66-3","method":"clear_v5/run_CLEAR_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":3}}
+{"ID_method": "66-4","method":"clear_v5/run_CLEAR_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":4}}
+{"ID_method": "66-5","method":"clear_v5/run_CLEAR_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":5}}
+{"ID_method": "66-6","method":"clear_v5/run_CLEAR_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":6}}
+{"ID_method": "66-7","method":"clear_v5/run_CLEAR_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":7}}
+{"ID_method": "66-8","method":"clear_v5/run_CLEAR_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":8}}
+{"ID_method": "66-9","method":"clear_v5/run_CLEAR_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":9}}
+{"ID_method": "66-10","method":"clear_v5/run_CLEAR_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":10}}
 {"ID_method": "63","method":"clear_v5/run_CLEAR_tnormal.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":1}}
 {"ID_method": "64","method":"clear_v5/run_CLEAR_beta.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":1}}
 {"ID_method": "65","method":"clear_v5/run_CLEAR_gamma.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":1}}
-{"ID_method": "66","method":"clear_v5/run_CLEAR_stat_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":1}}
+{"ID_method": "66","method":"clear_v5/run_CLEAR_tnormal_stat.R","method_params":{"i": 1000000, "b": 500000, "c":20,"C":500,"s":1}}
 {"ID_method": "67","method":"clear_v5/run_MGSA.R","method_params":{"c":20,"C":500}}
-{"ID_method": "68","method":"clear_v5/run_GSEA.R","method_params":{"c":20,"C":500}}
 {"ID_method": "69","method":"clear_v5/run_GSEA_stat.R","method_params":{"c":20,"C":500}}
 {"ID_method": "70","method":"clear_v5/run_hypergeom.R","method_params":{"c":20,"C":500}}

@@ -50,3 +50,6 @@ rsconnect/
 
 # Data files
 saved_data/
+
+# pycache
+__pycache__/
