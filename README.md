@@ -23,8 +23,6 @@ The `CLEAR_paper/` folder contains the scripts used to reproduce the analyses an
 
 The `example/` folder contains a small tutorial demonstrating how to run CLEAR with example data. It includes the input data, the CLEAR function script, and a runnable tutorial script that performs the analysis and saves the results.
 
-### Files
-
 - **`CLEAR.R`**  
   The main implementation of the CLEAR method. The tutorial script sources this file to run the model.
 
@@ -42,9 +40,3 @@ The `example/` folder contains a small tutorial demonstrating how to run CLEAR w
 
 - **`results/`**  
   A folder automatically created by the tutorial script to store the output `.rds` result files.
-
-### Running the tutorial
-
-To run the example:
-
-source("example/run_example.R")
