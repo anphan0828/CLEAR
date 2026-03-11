@@ -86,7 +86,7 @@ if (!is.null(args$seed)){
   selected_seed <- 0
 }
 set.seed(selected_seed)
-source("clear_v5/CLEARv5.R")
+source("R/CLEAR.R")
 set.seed(selected_seed)
 
 # load data
@@ -110,7 +110,7 @@ if(is.null(args$return_params)){
               row.names = FALSE,
               sep = "\t")
 } else {
-  print(paste0("Returning params:" ,args$return_params))
+  print(paste0("Returning params:" ,  gsub("\\.tsv", "_params.tsv", output_filename)))
   final_df <- data.frame(ID=names(result_gamma$on_frequency), on_frequency=result_gamma$on_frequency)
   write.table(final_df[, c("ID", "on_frequency")],
               file = output_filename,
@@ -119,13 +119,15 @@ if(is.null(args$return_params)){
               row.names = FALSE,
               sep = "\t")
   param_df <- data.frame(log_likelihoods = result_gamma$log_likelihoods,
-                         log_likelihoods_on = result_gamma$log_likelihoods_on,
-                         log_likelihoods_off = result_gamma$log_likelihoods_off,
-                         means = result_gamma$means,
-                         sds = result_gamma$sds
+                        #  log_likelihoods_on = result_gamma$log_likelihoods_on,
+                        #  log_likelihoods_off = result_gamma$log_likelihoods_off,
+                         p1_trace = result_gamma$p1_trace,
+                        #  max_per_chain = rep(result_gamma$max_per_chain, length(result_gamma$log_likelihoods)),
+                        #  sum_posterior = rep(result_gamma$sum_posterior, length(result_gamma$log_likelihoods)),
+                         p2_trace = result_gamma$p2_trace
                         )
   write.table(param_df,
-              file = paste0(strsplit(output_filename, "\\.")[[1]][1], "_params.tsv"),
+              file = gsub("\\.tsv", "_params.tsv", output_filename),
               quote = FALSE,
               col.names = TRUE,
               row.names = FALSE,

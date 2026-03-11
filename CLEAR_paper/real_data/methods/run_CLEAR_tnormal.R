@@ -94,7 +94,7 @@ if (!is.null(args$seed)){
   selected_seed <- 0
 }
 set.seed(selected_seed)
-source("clear_v5/CLEARv5.R")
+source("R/CLEAR.R")
 set.seed(selected_seed)
 
 # model p-values
@@ -111,7 +111,7 @@ if(is.null(args$return_params)){
               row.names = FALSE,
               sep = "\t")
 } else {
-  print(paste0("Returning params:" ,args$return_params))
+  print(paste0("Returning params:" ,  gsub("\\.tsv", "_params.tsv", output_filename)))
   final_df <- data.frame(ID=names(result_tnormal$on_frequency), on_frequency=result_tnormal$on_frequency)
   write.table(final_df[, c("ID", "on_frequency")],
               file = output_filename,
@@ -120,13 +120,15 @@ if(is.null(args$return_params)){
               row.names = FALSE,
               sep = "\t")
   param_df <- data.frame(log_likelihoods = result_tnormal$log_likelihoods,
-                         log_likelihoods_on = result_tnormal$log_likelihoods_on,
-                         log_likelihoods_off = result_tnormal$log_likelihoods_off,
-                         means = result_tnormal$means,
-                         sds = result_tnormal$sds
+                        #  log_likelihoods_on = result_tnormal$log_likelihoods_on,
+                        #  log_likelihoods_off = result_tnormal$log_likelihoods_off,
+                         p1_trace = result_tnormal$p1_trace,
+                        #  max_per_chain = rep(result_tnormal$max_per_chain, length(result_tnormal$log_likelihoods)),
+                        #  sum_posterior = rep(result_tnormal$sum_posterior, length(result_tnormal$log_likelihoods)),
+                         p2_trace = result_tnormal$p2_trace
                         )
   write.table(param_df,
-              file = paste0(strsplit(output_filename, "\\.")[[1]][1], "_params.tsv"),
+              file = gsub("\\.tsv", "_params.tsv", output_filename),
               quote = FALSE,
               col.names = TRUE,
               row.names = FALSE,

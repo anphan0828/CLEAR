@@ -1,0 +1,27 @@
+=== SUMMARY OF ALL ANALYSES ===
+
+Successfully processed datasets: 24 out of 24 
+GSE1297     :  1422 up,  1399 down, 13039 total genes
+GSE14762    :  5130 up,  4478 down, 21358 total genes
+GSE15471    :  7159 up,  8848 down, 21358 total genes
+GSE16515    :  3926 up,  3589 down, 21358 total genes
+GSE18842    :  6579 up,  6375 down, 21358 total genes
+GSE19188    :  9831 up,  5819 down, 21358 total genes
+GSE19728    :  2239 up,  4001 down, 21358 total genes
+GSE20153    :   342 up,   315 down, 21358 total genes
+GSE20291    :   324 up,   433 down, 13039 total genes
+GSE21354    :  3074 up,  4722 down, 21358 total genes
+GSE3467     :  3857 up,  3738 down, 21358 total genes
+GSE3585     :   954 up,   860 down, 13039 total genes
+GSE3678     :  1307 up,  2033 down, 21358 total genes
+GSE4107     :  3650 up,  3441 down, 21358 total genes
+GSE5281_EC  :  3557 up,  4516 down, 21358 total genes
+GSE5281_HIP :  3096 up,  5126 down, 21358 total genes
+GSE5281_VCX :  2813 up,  3753 down, 21358 total genes
+GSE6956AA   :   987 up,  1661 down, 13039 total genes
+GSE6956C    :   348 up,   500 down, 13039 total genes
+GSE781      :   791 up,  1287 down, 13039 total genes
+GSE8671     :  6518 up,  5143 down, 21358 total genes
+GSE8762     :   224 up,   367 down, 21358 total genes
+GSE9348     :  5726 up,  5261 down, 21358 total genes
+GSE9476     :  2352 up,  1784 down, 13039 total genes

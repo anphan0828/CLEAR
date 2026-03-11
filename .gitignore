@@ -50,6 +50,9 @@ rsconnect/
 
 # Data files
 saved_data/
+CLEAR_paper/real_data/geo_microarray_data
+CLEAR_paper/real_data/tcga_data
+CLEAR_paper/real_data/ext_data/03Nov24goa_human.gaf
 
 # pycache
 __pycache__/

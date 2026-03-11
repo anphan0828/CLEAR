@@ -3,6 +3,7 @@ library(tidyr)
 library(stringr)
 library(optparse)
 
+
 # Parse arguments
 option_list=list(
   make_option(c("-g", "--gene_file"), type="character", help="Expression data (csv or txt). Each row contains the gene name, optionally followed by tab plus expression level. No header!"),
@@ -16,7 +17,7 @@ option_list=list(
   make_option(c("-n", "--repeats"),type="character",help="Number of repeats"),
   make_option(c("-r", "--return_params"), type="character",
                                            help="Whether to return parameters"),
-  make_option(c("-s", "--seed"), type="character", help="Random seed, default 0 if not provided")     
+  make_option(c("-s", "--seed"), type="character", help="Random seed, default 0 if not provided")
 )
 parser = OptionParser(option_list=option_list)
 args = parse_args(parser)
@@ -92,18 +93,18 @@ if (!is.null(args$seed)){
   selected_seed <- 0
 }
 set.seed(selected_seed)
-source("clear_v5/CLEARv5.R")
+source("R/CLEAR.R")
 set.seed(selected_seed)
 
-# model p-values
-# beta distribution
-result_beta <- CLEAR(genes, p_values, GO,
-                    n_iterations = as.integer(args$n_iterations), burn_in = as.integer(args$burn_in),
-                    stat_type = "p-value",
-                    model_dist = "beta")
+
+# model Wald stat
+# truncated normal
+result_s_tnormal <- CLEAR(genes, stat, GO,
+                        n_iterations = as.integer(args$n_iterations), burn_in = as.integer(args$burn_in)
+                        )
 
 if(is.null(args$return_params)){
-  final_df <- data.frame(ID=names(result_beta$on_frequency), on_frequency=result_beta$on_frequency)
+  final_df <- data.frame(ID=names(result_s_tnormal$on_frequency), on_frequency=result_s_tnormal$on_frequency)
   write.table(final_df[, c("ID", "on_frequency")],
               file = output_filename,
               quote = FALSE,
@@ -111,22 +112,24 @@ if(is.null(args$return_params)){
               row.names = FALSE,
               sep = "\t")
 } else {
-  print(paste0("Returning params:" ,args$return_params))
-  final_df <- data.frame(ID=names(result_beta$on_frequency), on_frequency=result_beta$on_frequency)
+  print(paste0("Returning params:" ,  gsub("\\.tsv", "_params.tsv", output_filename)))
+  final_df <- data.frame(ID=names(result_s_tnormal$on_frequency), on_frequency=result_s_tnormal$on_frequency)
   write.table(final_df[, c("ID", "on_frequency")],
               file = output_filename,
               quote = FALSE,
               col.names = TRUE,
               row.names = FALSE,
               sep = "\t")
-  param_df <- data.frame(log_likelihoods = result_beta$log_likelihoods,
-                         log_likelihoods_on = result_beta$log_likelihoods_on,
-                         log_likelihoods_off = result_beta$log_likelihoods_off,
-                         means = result_beta$means,
-                         sds = result_beta$sds
+  param_df <- data.frame(log_likelihoods = result_s_tnormal$log_likelihoods,
+                        #  log_likelihoods_on = result_s_tnormal$log_likelihoods_on,
+                        #  log_likelihoods_off = result_s_tnormal$log_likelihoods_off,
+                         p1_trace = result_s_tnormal$p1_trace,
+                        #  max_per_chain = rep(result_s_tnormal$max_per_chain, length(result_s_tnormal$log_likelihoods)),
+                        #  sum_posterior = rep(result_s_tnormal$sum_posterior, length(result_s_tnormal$log_likelihoods)),
+                         p2_trace = result_s_tnormal$p2_trace
                         )
   write.table(param_df,
-              file = paste0(strsplit(output_filename, "\\.")[[1]][1], "_params.tsv"),
+              file = gsub("\\.tsv", "_params.tsv", output_filename),
               quote = FALSE,
               col.names = TRUE,
               row.names = FALSE,

@@ -25,6 +25,9 @@
 
 ### 3. Run methods and metrics
 - Metric scripts are listed in `3_metrics_log.ndjson`. This file was created manually, any parameters being used must be listed here.
+- Three metrics were used in the real data analysis: 
+    - Average term size and gene set overlap:
+    - PR-AUC:
 
 ### 4. Construct run list
 - To construct a run list: ```python3 4_prerun.py --datasets 1:15 --methods 63-1,64-1,65-1,66-1,66,67,69,70 --metrics 1:3```. If no dataset/method/metric is specified, default run list includes all.

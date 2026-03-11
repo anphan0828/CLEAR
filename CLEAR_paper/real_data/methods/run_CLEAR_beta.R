@@ -3,8 +3,6 @@ library(tidyr)
 library(stringr)
 library(optparse)
 
-source("clear_v5/hypergeom.R")
-
 # Parse arguments
 option_list=list(
   make_option(c("-g", "--gene_file"), type="character", help="Expression data (csv or txt). Each row contains the gene name, optionally followed by tab plus expression level. No header!"),
@@ -13,7 +11,12 @@ option_list=list(
   make_option(c("-o", "--output_filename"), type="character", help="Name for output file"),
   make_option(c("-c", "--lower_cutoff"),type="character",help="Lower cutoff for number of genes in term"), 
   make_option(c("-C", "--upper_cutoff"),type="character",help="Upper cutoff for number of genes in term"),
-  make_option(c("-n", "--repeats"),type="character",help="Number of repeats")
+  make_option(c("-b", "--burn_in"), type="character", help="Number of burn-in iterations"),
+  make_option(c("-i", "--n_iterations"), type="character", help="Number of iterations"),
+  make_option(c("-n", "--repeats"),type="character",help="Number of repeats"),
+  make_option(c("-r", "--return_params"), type="character",
+                                           help="Whether to return parameters"),
+  make_option(c("-s", "--seed"), type="character", help="Random seed, default 0 if not provided")     
 )
 parser = OptionParser(option_list=option_list)
 args = parse_args(parser)
@@ -76,26 +79,58 @@ if(is.null(args$preprocess_data)){
   gene_file$V4 <- as.numeric(gene_file$V4) # force numeric
 }
 
-# Only gene names as input for mgsa
-# o <- gene_file%>%
-#   filter(V3 < 0.05)
-gene_file <- gene_file%>%filter(V1 %in% annt2$gene)%>%arrange(desc(V2))%>%distinct(V1, .keep_all=TRUE)
 
+# load data
 genes <- gene_file$V1
 log2FC <- gene_file$V2
 p_values <- gene_file$V3
 stat <- gene_file$V4
 
-names(p_values) <- genes
+if (!is.null(args$seed)){
+  selected_seed <- as.integer(args$seed)
+} else {
+  selected_seed <- 0
+}
+set.seed(selected_seed)
+source("R/CLEAR.R")
+set.seed(selected_seed)
 
-hyper_res <- lapply(GO, hypergeom_test, all_pvals = p_values, threshold = 0.05)
-df = data.frame(value = sapply(hyper_res, function(x) -log(x$p_value)),
-                pvalue = sapply(hyper_res, function(x) x$p_value))
-df$ID = names(hyper_res)                
+# model p-values
+# beta distribution
+result_beta <- CLEAR(genes, p_values, GO,
+                    n_iterations = as.integer(args$n_iterations), burn_in = as.integer(args$burn_in),
+                    stat_type = "p-value",
+                    model_dist = "beta")
 
-write.table(df[, c("ID", "value", "pvalue")],
-            file = output_filename,
-            quote = FALSE,
-            col.names = TRUE,
-            row.names = FALSE,
-            sep = "\t")                        
+if(is.null(args$return_params)){
+  final_df <- data.frame(ID=names(result_beta$on_frequency), on_frequency=result_beta$on_frequency)
+  write.table(final_df[, c("ID", "on_frequency")],
+              file = output_filename,
+              quote = FALSE,
+              col.names = TRUE,
+              row.names = FALSE,
+              sep = "\t")
+} else {
+  print(paste0("Returning params:" ,  gsub("\\.tsv", "_params.tsv", output_filename)))
+  final_df <- data.frame(ID=names(result_beta$on_frequency), on_frequency=result_beta$on_frequency)
+  write.table(final_df[, c("ID", "on_frequency")],
+              file = output_filename,
+              quote = FALSE,
+              col.names = TRUE,
+              row.names = FALSE,
+              sep = "\t")
+  param_df <- data.frame(log_likelihoods = result_beta$log_likelihoods,
+                        #  log_likelihoods_on = result_beta$log_likelihoods_on,
+                        #  log_likelihoods_off = result_beta$log_likelihoods_off,
+                         p1_trace = result_beta$p1_trace,
+                        #  max_per_chain = rep(result_beta$max_per_chain, length(result_beta$log_likelihoods)),
+                        #  sum_posterior = rep(result_beta$sum_posterior, length(result_beta$log_likelihoods)),
+                         p2_trace = result_beta$p2_trace
+                        )
+  write.table(param_df,
+              file = gsub("\\.tsv", "_params.tsv", output_filename),
+              quote = FALSE,
+              col.names = TRUE,
+              row.names = FALSE,
+              sep = "\t")
+}  

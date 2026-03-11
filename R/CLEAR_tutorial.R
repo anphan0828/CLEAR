@@ -4,10 +4,12 @@ rm(list = ls())
 ## CLEAR tutorial script
 ## =========================================================
 
+## This script demonstrates how to run the CLEAR method on example data.
+## If running R from the command line, make sure you are in the root directory of the CLEAR repository
+
 ## 1) Set working directory
 ## Change this to your local CLEAR example folder
-work_dir <- "Your local path to CLEAR/example folder"
-work_dir <- "/Users/JasonJia/Documents/Workspace/GitHub/CLEAR/example/"
+work_dir <- "example/" # Change this to your data folder
 
 ## Make sure the path ends with "/"
 if (!grepl("/$", work_dir)) {
@@ -15,9 +17,9 @@ if (!grepl("/$", work_dir)) {
 }
 
 ## 2) Load CLEAR function
-source(file.path(work_dir, "CLEAR.R"))
+source(file.path("R/CLEAR.R"))
 
-## 3) Create results folder
+## 3) Create results folder (subfolder "results" in the working directory)
 result_dir <- file.path(work_dir, "results")
 if (!dir.exists(result_dir)) {
   dir.create(result_dir, recursive = TRUE)

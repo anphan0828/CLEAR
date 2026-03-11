@@ -62,7 +62,8 @@ CLEAR <- function(genes, stats, GO,
   on_freq <- numeric(n_sets) # Total iterations spent in state 1
   flip01 <- integer(n_sets)  # Transitions 0 -> 1
   flip10 <- integer(n_sets)  # Transitions 1 -> 0
-
+  # ll_score <- numeric((n_iterations - burn_in)) # For recording scores if needed
+  
   # --- MCMC Loop ---
   for (iter in 1:n_iterations) {
 
@@ -125,6 +126,7 @@ CLEAR <- function(genes, stats, GO,
     }
 
     # Recording
+    # if (iter > burn_in) ll_score[(iter - burn_in)] <- current_total_score # For recording scores if needed
     if (iter %% rec_interval == 0 && record_idx <= record_likelihoods) {
       rec_ll_total[record_idx] <- current_total_score
       rec_p1[record_idx] <- p1
@@ -143,6 +145,9 @@ CLEAR <- function(genes, stats, GO,
       n_accept <- 0; n_attempt <- 0
     }
   }
+  # # --- Getting chain's average posterior ---
+  # max_ll_score = max(ll_score, na.rm=TRUE) # Per-chain max (to prevent logs becoming zeros)
+  # sum_posterior <- sum(exp(ll_score - max_ll_score), na.rm=TRUE) # Store the exponent sum
 
   # --- Output Construction ---
   valid_idx <- 1:(record_idx - 1L)
@@ -175,6 +180,8 @@ CLEAR <- function(genes, stats, GO,
     transition_freq = transition_freq,
     log_likelihoods = rec_ll_total[valid_idx],
     p1_trace = rec_p1[valid_idx],
+    # max_per_chain = max_ll_score,
+    # sum_posterior = sum_posterior,
     p2_trace = rec_p2[valid_idx]
   )
 }
