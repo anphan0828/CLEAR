@@ -120,8 +120,8 @@ print("Available datasets:")
 print(all_datasets)
 
 # For de-duplicating by average expression
-if(!dir.exists("real_data/geo_microarray_data")) {
-  dir.create("real_data/geo_microarray_data")    
+if(!dir.exists("geo_microarray_data")) {
+  dir.create("geo_microarray_data")    
 }
 
 # Process each dataset
@@ -132,7 +132,7 @@ for (dataset_name in all_datasets) {
     eset <- get(dataset_name)
     
     # Perform DE analysis
-    results <- perform_de_analysis(eset, dataset_name, file_path = file.path("real_data/geo_microarray_data", paste0(dataset_name, "_de_limma.tsv")))
+    results <- perform_de_analysis(eset, dataset_name, file_path = file.path("geo_microarray_data", paste0(dataset_name, "_de_limma.tsv")))
     if(!is.null(results)) {
       results_list[[dataset_name]] <- results
     }   
@@ -142,7 +142,7 @@ for (dataset_name in all_datasets) {
 }
 
 # Summary of all analyses (write to file)
-summary_file <- "real_data/geo_microarray_data_summary.txt"
+summary_file <- "geo_microarray_data_summary.txt"
 
 cat("=== SUMMARY OF ALL ANALYSES ===\n", file = summary_file, sep = "\n")
 cat("Successfully processed datasets:", length(results_list), "out of", length(all_datasets), "\n", 

@@ -17,7 +17,7 @@ class annotation_data:
     ##############################
     
     def __init__(self, lower_cutoff, upper_cutoff,
-                gene_file, annotation_file, obo, identifier='test', annt_type='gaf'):
+                gene_file, annotation_file, obo, save_dir, identifier='test', annt_type='gaf'):
         self.lower_cutoff = int(lower_cutoff)
         self.upper_cutoff = int(upper_cutoff)
         self.gene_file = gene_file
@@ -25,6 +25,7 @@ class annotation_data:
         self.identifier = str(identifier)
         self.annt_type = annt_type
         self.obo = obo
+        self.save_dir = save_dir
         
         
     def get_expression_data(self):
@@ -131,7 +132,7 @@ class annotation_data:
                 data.columns=["EntryID","term"]
         else:
             dt = self.annotation_file.split('/')[-1].split('goa')[0]
-            if not os.path.exists('saved_data/save_'+dt+'_ancestors'):
+            if not os.path.exists(os.path.join(self.save_dir, 'save_'+dt+'_ancestors')):
                 print("Propagating from GAF file")
                 gaf = GOA.gafiterator(open(self.annotation_file,'r'))
                 print("GAF date generated:", dt)
@@ -147,12 +148,12 @@ class annotation_data:
                 roots = {'BPO': 'GO:0008150'}
                 subontologies = {aspect: ia.fetch_aspect(ontology_graph, roots[aspect]) for aspect in roots} 
                 data, ancestor_lookup = ia.propagate_terms(annotation_df, subontologies)
-                if not os.path.exists('saved_data'):
-                    os.makedirs('saved_data')
-                cp.dump((data, ancestor_lookup), open('saved_data/save_'+dt+'_ancestors', 'wb')) # not dataset-specific
+                if not os.path.exists(self.save_dir):
+                    os.makedirs(self.save_dir)
+                cp.dump((data, ancestor_lookup), open(os.path.join(self.save_dir, 'save_'+dt+'_ancestors'), 'wb')) # not dataset-specific
             else:
                 print("Loading propagated data")
-                data, ancestor_lookup = cp.load(open('saved_data/save_'+dt+'_ancestors', 'rb'))
+                data, ancestor_lookup = cp.load(open(os.path.join(self.save_dir, 'save_'+dt+'_ancestors'), 'rb'))
                 # Note: saved ancestor_lookup are single terms, not combined
 
         
@@ -207,11 +208,9 @@ class annotation_data:
         '''
         df = pd.DataFrame({'term': self.term_names, 'T': self.T})
         # write a tsv file for cut data-specific annotation data
-        if not os.path.exists('saved_data'):
-            os.makedirs('saved_data')
         if df.shape[0]>0:
-            df.to_csv('saved_data/save_'+self.identifier+'_'+str(self.lower_cutoff)+'to'
-                +str(self.upper_cutoff)+'_annotations.tsv', sep='\t', index=False)
+            df.to_csv(os.path.join(self.save_dir, 'save_'+self.identifier+'_'+str(self.lower_cutoff)+'to'
+                +str(self.upper_cutoff)+'_annotations.tsv'), sep='\t', index=False)
         else:
             print("No terms to save")
     
@@ -274,9 +273,17 @@ if __name__=="__main__":
     args=parse_args()
     if args.annt_type=="gaf" and args.obo is None:
         raise ValueError("If annotation file type is gaf, OBO file must be provided")
+    
+    # Get directory of gene_file to save annotation file as sibling directory
+    data_dir = os.path.dirname(args.gene_file)
+    save_dir = os.path.join(os.path.abspath(os.path.join(data_dir, os.pardir)),'saved_data')
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    filename = os.path.join(save_dir, 'save_'+args.identifier+'_'+str(args.lower_cutoff)+'to'+str(args.upper_cutoff)+'_annotations.tsv')
+    
     m=annotation_data(args.lower_cutoff,args.upper_cutoff,args.gene_file,
-                      args.annt,args.obo,args.identifier,args.annt_type)
-    filename = 'saved_data/save_'+args.identifier+'_'+str(args.lower_cutoff)+'to'+str(args.upper_cutoff)+'_annotations.tsv'
+                      args.annt,args.obo,save_dir,args.identifier,args.annt_type)
+    
     if not os.path.exists(filename): 
         m.runMe(verbose=0)
     else:

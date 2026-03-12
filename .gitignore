@@ -53,6 +53,10 @@ saved_data/
 CLEAR_paper/real_data/geo_microarray_data
 CLEAR_paper/real_data/tcga_data
 CLEAR_paper/real_data/ext_data/03Nov24goa_human.gaf
-
+CLEAR_paper/real_data/results_runtime
 # pycache
 __pycache__/
+
+.DS_Store
+CLEAR_paper/.DS_Store
+CLEAR_paper/in_silico_data/.DS_Store
