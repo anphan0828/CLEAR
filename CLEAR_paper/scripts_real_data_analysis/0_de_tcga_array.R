@@ -300,7 +300,7 @@ process_raw_file <- function(files, analysis_func, output_dir = "results",id=0) 
 }
 
 ### Main commands ####
-root_folder = "real_data/tcga_raw"
+root_folder = "tcga_raw"
 
 # Retrieve RData files of TCGA RNA-seq datasets from GSEABenchmarkeR::loadEData ####
 tcga <- loadEData("tcga", nr.datasets=15)
@@ -314,11 +314,6 @@ for (i in 1:length(tcga)){
   summarized_exp = tcga[[i]]
   save(summarized_exp,file=paste0(output_dir,"/",dataset,".Rdata"))
 }
-
-# Extract metadata from TCGA raw files first
-cat("=== Extracting TCGA Metadata ===\n")
-tcga_metadata <- extract_tcga_metadata(tcga_raw_dir = root_folder, 
-                                      output_file = "real_data/tcga_datasets_metadata.tsv")
 
 # Get MalaCards phenotype rankings and save as pickle
 mala_go_path = "GO_BP.rds"
@@ -342,6 +337,11 @@ ARRAY_SIZE = as.integer(args[2])
 selected_list = c()
 for (id in 1:length(files)){
   if (id %% ARRAY_SIZE == SLURM_ARRAY_TASK_ID){
-    process_raw_file(files, run_deseq2_analysis, output_dir = "real_data/tcga_data",id)
+    process_raw_file(files, run_deseq2_analysis, output_dir = "tcga_data",id)
   }
 }
+
+# Extract metadata from TCGA raw files first
+cat("=== Extracting TCGA Metadata ===\n")
+tcga_metadata <- extract_tcga_metadata(tcga_raw_dir = root_folder, 
+                                      output_file = "tcga_datasets_metadata.tsv")

@@ -4,34 +4,29 @@ import pandas as pd
 import argparse
 import pickle as cp
 
-
-if not os.path.exists("main_result.txt"):
-    with open('main_result.txt', 'w') as f:
-        f.write(f'ID_dataset\tID_method\tID_metric\tvalue\n')
-
-if not os.path.exists("results/"):
-    os.makedirs("results/")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PAPER_DIR = os.path.dirname(SCRIPT_DIR)
+DEFAULT_REAL_DATA_DIR = os.path.join(PAPER_DIR, "real_data")
 
 # Get list of datasets, methods, and metrics; construct run list
-def get_list_data_files(chosen_list=None):
-    df = pd.read_json("1_datasets_log.ndjson",lines=True, dtype={'ID_dataset': str})
+def get_list_data_files(data_dir, chosen_list=None):
+    df = pd.read_json(os.path.join(data_dir, "1_datasets_log.ndjson"), lines=True, dtype={'ID_dataset': str})
     if chosen_list is not None:
         df_chosen = df[df['ID_dataset'].isin(chosen_list)]
     else:
         df_chosen = df
     return df_chosen.to_dict(orient='records')
-    
 
-def get_list_methods(chosen_list=None):
-    df = pd.read_json("2_methods_log.ndjson",lines=True, dtype={'ID_method': str})
+def get_list_methods(data_dir, chosen_list=None):
+    df = pd.read_json(os.path.join(data_dir, "2_methods_log.ndjson"), lines=True, dtype={'ID_method': str})
     if chosen_list is not None:
         df_chosen = df[df['ID_method'].isin(chosen_list)]
     else:
         df_chosen = df
     return df_chosen.to_dict(orient='records')
 
-def get_list_metrics(chosen_list=None):
-    df = pd.read_json("3_metrics_log.ndjson",lines=True, dtype={'ID_metric': str})
+def get_list_metrics(data_dir, chosen_list=None):
+    df = pd.read_json(os.path.join(data_dir, "3_metrics_log.ndjson"), lines=True, dtype={'ID_metric': str})
     if chosen_list is not None:
         df_chosen = df[df['ID_metric'].isin(chosen_list)]
     else:
@@ -40,9 +35,9 @@ def get_list_metrics(chosen_list=None):
 
 
 # Run the dataset, method, and metric if id matches
-def run_dataset_method_metric(datasets, methods, metrics):
+def run_dataset_method_metric(data_dir, datasets, methods, metrics):
     need_run = []
-    log = pd.read_csv("main_result.txt", sep='\t',dtype={'ID_dataset': str, 'ID_method': str, 'ID_metric': str})
+    log = pd.read_csv(os.path.join(data_dir, "main_result.txt"), sep='\t', dtype={'ID_dataset': str, 'ID_method': str, 'ID_metric': str})
     
     for dataset in datasets:
         ID_dataset = str(dataset["ID_dataset"])
@@ -60,14 +55,6 @@ def run_dataset_method_metric(datasets, methods, metrics):
                 #else
                     #print(f"Dataset {ID_dataset} with method {ID_method} and metric {ID_metric} exists, skipping run")
     return need_run
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description='Process datasets and methods.')
-    parser.add_argument('--datasets', type=str, help='Dataset indices (e.g., 1,2,3 or 1:5)')
-    parser.add_argument('--methods', type=str, help='Method indices (e.g., 1,2,3 or 1:5)')
-    parser.add_argument('--metrics', type=str, help='Metric indices (e.g., 1,2,3 or 1:5)')
-    return parser.parse_args()
 
 
 def get_chosen_arguments(arg_str):
@@ -110,8 +97,29 @@ def get_chosen_arguments(arg_str):
         sys.exit(1)
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Process datasets and methods.')
+    parser.add_argument('--dir', '-d', type=str, default=DEFAULT_REAL_DATA_DIR,
+                        help='Directory containing 1_datasets_log.ndjson, 2_methods_log.ndjson, 3_metrics_log.ndjson, main_result.txt, and results/.')
+    parser.add_argument('--datasets', type=str, help='Dataset indices (e.g., 1,2,3 or 1:5)')
+    parser.add_argument('--methods', type=str, help='Method indices (e.g., 1,2,3 or 1:5)')
+    parser.add_argument('--metrics', type=str, help='Metric indices (e.g., 1,2,3 or 1:5)')
+    return parser.parse_args()
+
+
 def main():
     args = parse_args()
+    data_dir = os.path.abspath(args.dir)
+    if not os.path.exists(data_dir):
+        print(f"Directory {data_dir} does not exist. Please check the path and try again.")
+        sys.exit(1)
+    
+    if not os.path.exists(os.path.join(data_dir, "main_result.txt")):
+        with open(os.path.join(data_dir, "main_result.txt"), 'w') as f:
+            f.write(f'ID_dataset\tID_method\tID_metric\tvalue\n')
+
+    if not os.path.exists(os.path.join(data_dir, "results/")):
+        os.makedirs(os.path.join(data_dir, "results/"))
 
     chosen_datasets = get_chosen_arguments(args.datasets)
     chosen_methods = get_chosen_arguments(args.methods)
@@ -122,9 +130,14 @@ def main():
     print(f"Chosen methods: {chosen_methods}")
     print(f"Chosen metrics: {chosen_metrics}") 
     
-    run_list = run_dataset_method_metric(get_list_data_files(chosen_datasets), get_list_methods(chosen_methods), get_list_metrics(chosen_metrics))
+    run_list = run_dataset_method_metric(
+        data_dir,
+        get_list_data_files(data_dir, chosen_datasets),
+        get_list_methods(data_dir, chosen_methods),
+        get_list_metrics(data_dir, chosen_metrics)
+    )
     
-    with open("4_run_list", "wb") as f:
+    with open(os.path.join(data_dir, "4_run_list"), "wb") as f:
         cp.dump(run_list, f)
     print(f"\nConstructed run list: {len(run_list)} jobs to run")
 

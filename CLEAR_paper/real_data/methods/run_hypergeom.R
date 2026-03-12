@@ -3,6 +3,34 @@ library(tidyr)
 library(stringr)
 library(optparse)
 
+### Hypergeometric helper function for ORA ####
+hypergeom_test <- function(term_genes, all_pvals, threshold = 0.05) {
+  total_genes <- length(all_pvals)
+
+  significant_genes <- names(all_pvals)[all_pvals < threshold]
+  num_significant <- length(significant_genes)
+
+  genes_in_term <- intersect(term_genes, names(all_pvals))
+  num_genes_in_term <- length(genes_in_term)
+
+  genes_in_overlap <- intersect(genes_in_term, significant_genes)
+  num_genes_in_overlap <- length(genes_in_overlap)
+
+  # Perform the hypergeometric test
+  p_value <- phyper(
+    q = num_genes_in_overlap - 1,  # Number of successes in the sample - 1 (phyper is P(X <= q), so subtract 1 for P(X >= q))
+    m = num_genes_in_term,        # Total successes in population (genes in term)
+    n = total_genes - num_genes_in_term,  # Total failures in population
+    k = num_significant,          # Sample size (significant genes)
+    lower.tail = FALSE            # We want P(X >= q)
+  )
+
+  return(list(
+    term_size = num_genes_in_term,
+    overlap_size = num_genes_in_overlap,
+    p_value = p_value
+  ))
+}
 
 # Parse arguments
 option_list=list(
@@ -12,12 +40,7 @@ option_list=list(
   make_option(c("-o", "--output_filename"), type="character", help="Name for output file"),
   make_option(c("-c", "--lower_cutoff"),type="character",help="Lower cutoff for number of genes in term"), 
   make_option(c("-C", "--upper_cutoff"),type="character",help="Upper cutoff for number of genes in term"),
-  make_option(c("-b", "--burn_in"), type="character", help="Number of burn-in iterations"),
-  make_option(c("-i", "--n_iterations"), type="character", help="Number of iterations"),
-  make_option(c("-n", "--repeats"),type="character",help="Number of repeats"),
-  make_option(c("-r", "--return_params"), type="character",
-                                           help="Whether to return parameters"),
-  make_option(c("-s", "--seed"), type="character", help="Random seed, default 0 if not provided")
+  make_option(c("-n", "--repeats"),type="character",help="Number of repeats")
 )
 parser = OptionParser(option_list=option_list)
 args = parse_args(parser)
@@ -80,56 +103,26 @@ if(is.null(args$preprocess_data)){
   gene_file$V4 <- as.numeric(gene_file$V4) # force numeric
 }
 
+# Only gene names as input for mgsa
+# o <- gene_file%>%
+#   filter(V3 < 0.05)
+gene_file <- gene_file%>%filter(V1 %in% annt2$gene)%>%arrange(desc(V2))%>%distinct(V1, .keep_all=TRUE)
 
-# load data
 genes <- gene_file$V1
 log2FC <- gene_file$V2
 p_values <- gene_file$V3
 stat <- gene_file$V4
 
-if (!is.null(args$seed)){
-  selected_seed <- as.integer(args$seed)
-} else {
-  selected_seed <- 0
-}
-set.seed(selected_seed)
-source("clear_v5/CLEARv5.R")
-set.seed(selected_seed)
+names(p_values) <- genes
 
+hyper_res <- lapply(GO, hypergeom_test, all_pvals = p_values, threshold = 0.05)
+df = data.frame(value = sapply(hyper_res, function(x) -log(x$p_value)),
+                pvalue = sapply(hyper_res, function(x) x$p_value))
+df$ID = names(hyper_res)                
 
-# model Wald stat
-# truncated normal
-result_s_tnormal <- CLEAR(genes, stat, GO,
-                        n_iterations = as.integer(args$n_iterations), burn_in = as.integer(args$burn_in)
-                        )
-
-if(is.null(args$return_params)){
-  final_df <- data.frame(ID=names(result_s_tnormal$on_frequency), on_frequency=result_s_tnormal$on_frequency)
-  write.table(final_df[, c("ID", "on_frequency")],
-              file = output_filename,
-              quote = FALSE,
-              col.names = TRUE,
-              row.names = FALSE,
-              sep = "\t")
-} else {
-  print(paste0("Returning params:" ,args$return_params))
-  final_df <- data.frame(ID=names(result_s_tnormal$on_frequency), on_frequency=result_s_tnormal$on_frequency)
-  write.table(final_df[, c("ID", "on_frequency")],
-              file = output_filename,
-              quote = FALSE,
-              col.names = TRUE,
-              row.names = FALSE,
-              sep = "\t")
-  param_df <- data.frame(log_likelihoods = result_s_tnormal$log_likelihoods,
-                         log_likelihoods_on = result_s_tnormal$log_likelihoods_on,
-                         log_likelihoods_off = result_s_tnormal$log_likelihoods_off,
-                         means = result_s_tnormal$means,
-                         sds = result_s_tnormal$sds
-                        )
-  write.table(param_df,
-              file = paste0(strsplit(output_filename, "\\.")[[1]][1], "_params.tsv"),
-              quote = FALSE,
-              col.names = TRUE,
-              row.names = FALSE,
-              sep = "\t")
-}  
+write.table(df[, c("ID", "value", "pvalue")],
+            file = output_filename,
+            quote = FALSE,
+            col.names = TRUE,
+            row.names = FALSE,
+            sep = "\t")                        

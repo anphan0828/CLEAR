@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import pickle as cp
 import random
+from sklearn.discriminant_analysis import StandardScaler
 from sklearn.metrics import auc
 from matplotlib import pyplot as plt
 import re
@@ -85,6 +86,50 @@ def combine_repeats(input_files):
         combined_table['sum_value'] = combined_table[[col for col in combined_table.columns if col.startswith('value')]].sum(axis=1)
     else:
         combined_table['sum_value'] = combined_table[[col for col in combined_table.columns if col.startswith('pvalue')]].sum(axis=1)
+    return combined_table, higher_is_better
+
+def combine_repeats_weighted(input_files):
+    combined_table = pd.DataFrame()
+    for repeat, input_file in enumerate(input_files):
+        table = pd.read_csv(input_file, header=0,sep="\t")
+        if 'pvalue' in table.columns:
+            table.columns = ["term", "value", "pvalue"]
+            table = table.sort_values(by=['pvalue','term'], ascending=[True,True])
+            higher_is_better = False
+        else:
+            table.columns = ["term","value"]
+            table = table.sort_values(by=['value','term'], ascending=[False,True]) # sorting by on_frequency and estimate
+            higher_is_better = True
+        if combined_table.empty:
+            combined_table = table
+        else:
+            combined_table = pd.merge(combined_table, table, on="term", how="outer", suffixes=('', f'_{repeat}'))
+    if 'value' in combined_table.columns:
+        combined_table = combined_table.rename(columns={"value": "value_0"})
+    if 'pvalue' in combined_table.columns:
+        combined_table = combined_table.rename(columns={"pvalue": "pvalue_0"})
+    
+    # Get weights based on average_posteriors from params files
+    weights = []
+    max_per_chains = []
+    sum_posteriors = []
+    for input_file in input_files:
+        params_file = input_file.replace('.tsv', '_params.tsv')
+        try:
+            params_df = pd.read_csv(params_file, sep="\t", header=0)
+            max_per_chains.append(params_df['max_per_chain'].iloc[0])
+            sum_posteriors.append(params_df['sum_posterior'].iloc[0])
+        except Exception:
+            raise ValueError(f"Error reading params file: {params_file}")
+    max_all_chains = max(max_per_chains)
+    shift_per_chain = [np.exp(max_per_chains[i] - max_all_chains) for i in range(len(max_per_chains))] # to scale each chain to global max
+    shift_sum_posteriors = [sum_posteriors[i] * shift_per_chain[i] for i in range(len(sum_posteriors))] # scaled sum_posteriors
+    weights = [ssp / sum(shift_sum_posteriors) for ssp in shift_sum_posteriors] # normalized weights summing to 1
+    print(weights)
+    if higher_is_better:
+        combined_table['sum_value'] = sum(weights[i] * combined_table[f'value_{i}'] for i in range(len(input_files))) 
+    else:
+        combined_table['sum_value'] = sum(weights[i] * combined_table[f'pvalue_{i}'] for i in range(len(input_files))) 
     return combined_table, higher_is_better
 
 def pheno_pr(combined_table, higher_is_better, phenotype_df):    
@@ -238,25 +283,28 @@ with open('main_result.txt', 'a') as f:
         f.write(f'{ID_dataset}\t{ID_method}\t{ID_metric_overlap}\t{res_overlap}\n')
 
 # Plotting PCA for repeats
-fig, ax = plt.subplots(ncols=4, nrows=6, figsize=(20, 30))        
+fig, ax = plt.subplots(ncols=4, nrows=6, figsize=(20, 30))
 idx=0
 for each in run_list:
     (dataset, method, metric) = each
     ID_dataset = str(dataset["ID_dataset"])
     gene_file = str(dataset["gene_list"])
-    annotation_file = 'saved_data/' + str(dataset["annotations"])
+    annotation_file = '../benchmark_GSEA/saved_data/' + str(dataset["annotations"])
     ID_method = str(method["ID_method"]).split("-")[0]  # remove repeat suffix
-    if ID_method != '65':
+    if ID_method != '63':
         continue
     idx+=1
     cancer_id = gene_file.split("/")[-1].split(".")[0].split("_de_limma")[0]
-    input_files = [os.path.join('results', x) for x in os.listdir('results') if x.startswith(f'{ID_dataset}_{ID_method}-') and x.endswith('_result.tsv')]
+    input_files = [os.path.join('../benchmark_GSEA/results', x) for x in os.listdir('../benchmark_GSEA/results') if x.startswith(f'{ID_dataset}_{ID_method}-') and x.endswith('_result.tsv')]
     
     # Resolve ties and get chosen terms
     combined_table, higher_is_better = combine_repeats(input_files)
     pca = PCA(n_components=2)
-    principalComponents = pca.fit_transform(combined_table[[col for col in combined_table.columns if col.startswith('value')]].T)
+    X_df = combined_table[[col for col in combined_table.columns if col.startswith('value')]].T
+    X_scaled = np.arcsin(np.sqrt(X_df)) # arcsin transformation for better visualization of values between 0 and 1
+    principalComponents = pca.fit_transform(X_scaled)
     df_pca = pd.DataFrame(data = principalComponents, columns = ['PC1', 'PC2'])
+    pc1_var, pc2_var = pca.explained_variance_ratio_
     
     ax_idx = (idx-1)//4, (idx-1)%4
     ax[ax_idx].scatter(df_pca['PC1'], df_pca['PC2'], color='blue', label='All gene sets', alpha=0.7)
@@ -265,14 +313,16 @@ for each in run_list:
     filtered_df = combined_table[combined_table[[col for col in combined_table.columns if col.startswith('value')]].ge(0.5).any(axis=1)] 
     if len(filtered_df) >= 2:
         pca = PCA(n_components=2)
-        principalComponents = pca.fit_transform(filtered_df[[col for col in filtered_df.columns if col.startswith('value')]].T)
+        X_df = filtered_df[[col for col in filtered_df.columns if col.startswith('value')]].T
+        X_scaled = np.arcsin(np.sqrt(X_df)) # arcsin transformation for better visualization of values between 0 and 1
+        principalComponents = pca.fit_transform(X_scaled)
         filtered_df_pca = pd.DataFrame(data = principalComponents, columns = ['PC1', 'PC2'])
-        
+        f_pc1_var, f_pc2_var = pca.explained_variance_ratio_
         ax[ax_idx].scatter(filtered_df_pca['PC1'], filtered_df_pca['PC2'], color='red', label='Gene sets >=0.5', alpha=0.7)
     ax[ax_idx].set_title(f'{cancer_id}_{ID_method}')
-    ax[ax_idx].set_xlabel('PC1')
-    ax[ax_idx].set_ylabel('PC2')
+    ax[ax_idx].set_xlabel(f'PC1 ({pc1_var:.2%}) and ({f_pc1_var:.2%})' if len(filtered_df) >= 2 else f'PC1 ({pc1_var:.2%})')
+    ax[ax_idx].set_ylabel(f'PC2 ({pc2_var:.2%}) and ({f_pc2_var:.2%})' if len(filtered_df) >= 2 else f'PC2 ({pc2_var:.2%})')
 
 plt.tight_layout()
 plt.legend()
-plt.savefig('combined_repeats_pca_gamma.png')
+plt.savefig('combined_repeats_pca_tnormal.png')
