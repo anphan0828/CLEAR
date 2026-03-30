@@ -19,7 +19,7 @@ SCRIPT_DIR="CLEAR_paper/scripts_real_data_analysis"
 
 There are two execution contexts in this workflow:
 
-- **Dataset retrieval scripts (Step 0):** these scripts can be skipped if you download pre-processed data (TCGA RNA-seq and GEO microarray) from the Figshare repository.
+- **Dataset retrieval scripts (Step 0):** these scripts can be skipped if you download pre-processed data (TCGA RNA-seq and GEO microarray) from our [Figshare repository](https://doi.org/10.6084/m9.figshare.31891432).
 - **Benchmarking framework scripts (Steps 1-6):** logs/results are in `CLEAR_paper/real_data`, while driver scripts are in `CLEAR_paper/scripts_real_data_analysis`.
 All steps listed in the framework should be run from project root (`CLEAR/`), unless otherwise specified.
 
